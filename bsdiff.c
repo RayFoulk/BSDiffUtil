@@ -297,8 +297,8 @@ int main(int argc, char *argv[])
     if (argc != 4)
         errx(1, "usage: %s oldfile newfile patchfile\n", argv[0]);
 
-    /* Allocate oldsize+1 bytes instead of oldsize bytes to ensure that we
-       never try to malloc(0) and get a NULL pointer */
+    // Allocate oldsize+1 bytes instead of oldsize bytes to ensure that we
+    //   never try to malloc(0) and get a NULL pointer
     if (((fd = open(argv[1], O_RDONLY, 0)) < 0) ||
         ((oldsize = lseek(fd, 0, SEEK_END)) == -1) ||
         ((old = malloc(oldsize + 1)) == NULL) ||
@@ -314,8 +314,8 @@ int main(int argc, char *argv[])
 
     free(V);
 
-    /* Allocate newsize+1 bytes instead of newsize bytes to ensure that we
-       never try to malloc(0) and get a NULL pointer */
+    // Allocate newsize+1 bytes instead of newsize bytes to ensure that we
+    //   never try to malloc(0) and get a NULL pointer
     if (((fd = open(argv[2], O_RDONLY, 0)) < 0) ||
         ((newsize = lseek(fd, 0, SEEK_END)) == -1) ||
         ((new = malloc(newsize + 1)) == NULL) ||
@@ -329,14 +329,21 @@ int main(int argc, char *argv[])
     dblen = 0;
     eblen = 0;
 
-    /* Create the patch file */
+    // Create the patch file
     if ((pf = fopen(argv[3], "w")) == NULL)
         err(1, "%s", argv[3]);
 
-    /* Header is 0 8 "BSDIFF40" 8 8 length of bzip2ed ctrl block 16 8 length
-       of bzip2ed diff block 24 8 length of new file */
-    /* File is 0 32 Header 32 ?? Bzip2ed ctrl block ?? ?? Bzip2ed diff block
-       ?? ?? Bzip2ed extra block */
+    // Header is
+    //    0    8     "BSDIFF40"
+    //    8    8    length of bzip2ed ctrl block
+    //    16    8    length of bzip2ed diff block
+    //    24    8    length of new file
+    // File is
+    //    0    32    Header
+    //    32    ??    Bzip2ed ctrl block
+    //    ??    ??    Bzip2ed diff block
+    //    ??    ??    Bzip2ed extra block
+
     memcpy(header, "BSDIFF40", 8);
     offtout(0, header + 8);
     offtout(0, header + 16);
@@ -344,7 +351,7 @@ int main(int argc, char *argv[])
     if (fwrite(header, 32, 1, pf) != 1)
         err(1, "fwrite(%s)", argv[3]);
 
-    /* Compute the differences, writing ctrl as we go */
+    // Compute the differences, writing ctrl as we go
     if ((pfbz2 = BZ2_bzWriteOpen(&bz2err, pf, 9, 0, 0)) == NULL)
         errx(1, "BZ2_bzWriteOpen, bz2err = %d", bz2err);
     scan = 0;
@@ -464,12 +471,12 @@ int main(int argc, char *argv[])
     if (bz2err != BZ_OK)
         errx(1, "BZ2_bzWriteClose, bz2err = %d", bz2err);
 
-    /* Compute size of compressed ctrl data */
+    // Compute size of compressed ctrl data
     if ((len = ftello(pf)) == -1)
         err(1, "ftello");
     offtout(len - 32, header + 8);
 
-    /* Write compressed diff data */
+    // Write compressed diff data
     if ((pfbz2 = BZ2_bzWriteOpen(&bz2err, pf, 9, 0, 0)) == NULL)
         errx(1, "BZ2_bzWriteOpen, bz2err = %d", bz2err);
     BZ2_bzWrite(&bz2err, pfbz2, db, dblen);
@@ -479,12 +486,12 @@ int main(int argc, char *argv[])
     if (bz2err != BZ_OK)
         errx(1, "BZ2_bzWriteClose, bz2err = %d", bz2err);
 
-    /* Compute size of compressed diff data */
+    // Compute size of compressed diff data
     if ((newsize = ftello(pf)) == -1)
         err(1, "ftello");
     offtout(newsize - len, header + 16);
 
-    /* Write compressed extra data */
+    // Write compressed extra data
     if ((pfbz2 = BZ2_bzWriteOpen(&bz2err, pf, 9, 0, 0)) == NULL)
         errx(1, "BZ2_bzWriteOpen, bz2err = %d", bz2err);
     BZ2_bzWrite(&bz2err, pfbz2, eb, eblen);
@@ -494,7 +501,7 @@ int main(int argc, char *argv[])
     if (bz2err != BZ_OK)
         errx(1, "BZ2_bzWriteClose, bz2err = %d", bz2err);
 
-    /* Seek to the beginning, write the header, and close the file */
+    // Seek to the beginning, write the header, and close the file
     if (fseeko(pf, 0, SEEK_SET))
         err(1, "fseeko");
     if (fwrite(header, 32, 1, pf) != 1)
@@ -502,7 +509,7 @@ int main(int argc, char *argv[])
     if (fclose(pf))
         err(1, "fclose");
 
-    /* Free the memory we used */
+    // Free the memory we used
     free(db);
     free(eb);
     free(I);

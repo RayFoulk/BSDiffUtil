@@ -81,18 +81,23 @@ int main(int argc, char *argv[])
     if (argc != 4)
         errx(1, "usage: %s oldfile newfile patchfile\n", argv[0]);
 
-    /* Open patch file */
+    // Open patch file
     if ((f = fopen(argv[3], "r")) == NULL)
         err(1, "fopen(%s)", argv[3]);
 
-    /* 
-       File format: 0 8 "BSDIFF40" 8 8 X 16 8 Y 24 8 sizeof(newfile) 32 X
-       bzip2(control block) 32+X Y bzip2(diff block) 32+X+Y ??? bzip2(extra
-       block) with control block a set of triples (x,y,z) meaning "add x bytes
-       from oldfile to x bytes from the diff block; copy y bytes from the extra 
-       block; seek forwards in oldfile by z bytes". */
+    // File format:
+    //    0    8    "BSDIFF40"
+    //    8    8    X
+    //    16    8    Y
+    //    24    8    sizeof(newfile)
+    //    32    X    bzip2(control block)
+    //    32+X    Y    bzip2(diff block)
+    //    32+X+Y    ???    bzip2(extra block)
+    // with control block a set of triples (x,y,z) meaning "add x bytes
+    // from oldfile to x bytes from the diff block; copy y bytes from the
+    // extra block; seek forwards in oldfile by z bytes".
 
-    /* Read header */
+    // Read header
     if (fread(header, 1, 32, f) < 32)
     {
         if (feof(f))
@@ -100,18 +105,18 @@ int main(int argc, char *argv[])
         err(1, "fread(%s)", argv[3]);
     }
 
-    /* Check for appropriate magic */
+    // Check for appropriate magic
     if (memcmp(header, "BSDIFF40", 8) != 0)
         errx(1, "Corrupt patch\n");
 
-    /* Read lengths from header */
+    // Read lengths from header
     bzctrllen = offtin(header + 8);
     bzdatalen = offtin(header + 16);
     newsize = offtin(header + 24);
     if ((bzctrllen < 0) || (bzdatalen < 0) || (newsize < 0))
         errx(1, "Corrupt patch\n");
 
-    /* Close patch file and re-open it via libbzip2 at the right places */
+    // Close patch file and re-open it via libbzip2 at the right places
     if (fclose(f))
         err(1, "fclose(%s)", argv[3]);
     if ((cpf = fopen(argv[3], "r")) == NULL)
@@ -147,7 +152,7 @@ int main(int argc, char *argv[])
     newpos = 0;
     while (newpos < newsize)
     {
-        /* Read control data */
+        // Read control data
         for (i = 0; i <= 2; i++)
         {
             lenread = BZ2_bzRead(&cbz2err, cpfbz2, buf, 8);
@@ -157,48 +162,48 @@ int main(int argc, char *argv[])
             ctrl[i] = offtin(buf);
         };
 
-        /* Sanity-check */
+        // Sanity-check
         if (newpos + ctrl[0] > newsize)
             errx(1, "Corrupt patch\n");
 
-        /* Read diff string */
+        // Read diff string
         lenread = BZ2_bzRead(&dbz2err, dpfbz2, new + newpos, ctrl[0]);
         if ((lenread < ctrl[0]) ||
             ((dbz2err != BZ_OK) && (dbz2err != BZ_STREAM_END)))
             errx(1, "Corrupt patch\n");
 
-        /* Add old data to diff string */
+        // Add old data to diff string
         for (i = 0; i < ctrl[0]; i++)
             if ((oldpos + i >= 0) && (oldpos + i < oldsize))
                 new[newpos + i] += old[oldpos + i];
 
-        /* Adjust pointers */
+        // Adjust pointers
         newpos += ctrl[0];
         oldpos += ctrl[0];
 
-        /* Sanity-check */
+        // Sanity-check
         if (newpos + ctrl[1] > newsize)
             errx(1, "Corrupt patch\n");
 
-        /* Read extra string */
+        // Read extra string
         lenread = BZ2_bzRead(&ebz2err, epfbz2, new + newpos, ctrl[1]);
         if ((lenread < ctrl[1]) ||
             ((ebz2err != BZ_OK) && (ebz2err != BZ_STREAM_END)))
             errx(1, "Corrupt patch\n");
 
-        /* Adjust pointers */
+        // Adjust pointers
         newpos += ctrl[1];
         oldpos += ctrl[2];
     };
 
-    /* Clean up the bzip2 reads */
+    // Clean up the bzip2 reads
     BZ2_bzReadClose(&cbz2err, cpfbz2);
     BZ2_bzReadClose(&dbz2err, dpfbz2);
     BZ2_bzReadClose(&ebz2err, epfbz2);
     if (fclose(cpf) || fclose(dpf) || fclose(epf))
         err(1, "fclose(%s)", argv[3]);
 
-    /* Write the new file */
+    // Write the new file
     if (((fd = open(argv[2], O_CREAT | O_TRUNC | O_WRONLY, 0666)) < 0) ||
         (write(fd, new, newsize) != newsize) || (close(fd) == -1))
         err(1, "%s", argv[2]);
