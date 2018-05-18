@@ -10,9 +10,13 @@ bspatch:	bspatch.c
 
 test:
 	./bsdiff tests/bin1 tests/bin2 tests/bin.patch
+	./bspatch tests/bin1 tests/bin.patched tests/bin.patch
+	diff -s tests/bin2 tests/bin.patched
+	md5sum tests/bin2
+	md5sum tests/bin.patched
 
 clean:
-	rm -f bsdiff bspatch tests/bin.patch
+	rm -f bsdiff bspatch tests/bin.patch tests/bin.patched
 
 install:
 	${INSTALL_PROGRAM} bsdiff bspatch ${PREFIX}/bin
