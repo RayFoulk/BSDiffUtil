@@ -8,11 +8,15 @@ all:		bsdiff bspatch
 bsdiff:		bsdiff.c
 bspatch:	bspatch.c
 
+test:
+	./bsdiff tests/bin1 tests/bin2 tests/bin.patch
+
 clean:
-	rm -f bsdiff bspatch
+	rm -f bsdiff bspatch tests/bin.patch
 
 install:
 	${INSTALL_PROGRAM} bsdiff bspatch ${PREFIX}/bin
 #.ifndef WITHOUT_MAN
 #	${INSTALL_MAN} bsdiff.1 bspatch.1 ${PREFIX}/man/man1
 #.endif
+
