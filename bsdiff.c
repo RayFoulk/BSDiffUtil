@@ -24,13 +24,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if 0
-__FBSDID
-    ("$FreeBSD: src/usr.bin/bsdiff/bsdiff/bsdiff.c,v 1.1 2005/08/06 01:59:05 cperciva Exp $");
-#endif
+//------------------------------------------------------------------------+
+// Modifications by Ray Foulk (rfoukl@gmail.com) 2018
 
 #include <sys/types.h>
-
 #include <bzlib.h>
 #include <err.h>
 #include <fcntl.h>
@@ -39,8 +36,10 @@ __FBSDID
 #include <string.h>
 #include <unistd.h>
 
+//------------------------------------------------------------------------+
 #define MIN(x,y) (((x)<(y)) ? (x) : (y))
 
+//------------------------------------------------------------------------+
 static void split(off_t * I, off_t * V, off_t start, off_t len, off_t h)
 {
     off_t i, j, k, x, tmp, jj, kk;
@@ -139,6 +138,7 @@ static void split(off_t * I, off_t * V, off_t start, off_t len, off_t h)
         split(I, V, kk, start + len - kk, h);
 }
 
+//------------------------------------------------------------------------+
 static void qsufsort(off_t * I, off_t * V, u_char * old, off_t oldsize)
 {
     off_t buckets[256];
@@ -193,6 +193,7 @@ static void qsufsort(off_t * I, off_t * V, u_char * old, off_t oldsize)
         I[V[i]] = i;
 }
 
+//------------------------------------------------------------------------+
 static off_t matchlen(u_char * old, off_t oldsize, u_char * new, off_t newsize)
 {
     off_t i;
@@ -204,6 +205,7 @@ static off_t matchlen(u_char * old, off_t oldsize, u_char * new, off_t newsize)
     return i;
 }
 
+//------------------------------------------------------------------------+
 static off_t search(off_t * I, u_char * old, off_t oldsize,
                     u_char * new, off_t newsize, off_t st, off_t en,
                     off_t * pos)
@@ -238,6 +240,7 @@ static off_t search(off_t * I, u_char * old, off_t oldsize,
     };
 }
 
+//------------------------------------------------------------------------+
 static void offtout(off_t x, u_char * buf)
 {
     off_t y;
@@ -274,6 +277,7 @@ static void offtout(off_t x, u_char * buf)
         buf[7] |= 0x80;
 }
 
+//------------------------------------------------------------------------+
 int main(int argc, char *argv[])
 {
     int fd;
@@ -353,7 +357,11 @@ int main(int argc, char *argv[])
 
     // Compute the differences, writing ctrl as we go
     if ((pfbz2 = BZ2_bzWriteOpen(&bz2err, pf, 9, 0, 0)) == NULL)
+    {
         errx(1, "BZ2_bzWriteOpen, bz2err = %d", bz2err);
+    }
+
+    pos = 0;
     scan = 0;
     len = 0;
     lastscan = 0;
