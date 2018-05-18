@@ -5,8 +5,8 @@ INSTALL_PROGRAM	?=	${INSTALL} -c -s -m 555
 INSTALL_MAN	?=	${INSTALL} -c -m 444
 
 all:		bsdiff bspatch
-bsdiff:		bsdiff.c
-bspatch:	bspatch.c
+bsdiff:		bsdiff.c bsio.c
+bspatch:	bspatch.c bsio.c
 
 test:
 	./bsdiff tests/bin1 tests/bin2 tests/bin.patch
