@@ -1,12 +1,5 @@
 #include <bzlib.h>
 
-// BZ2_bzRead(
-// BZ2_bzReadClose(
-// BZ2_bzReadOpen(
-// BZ2_bzWrite(
-// BZ2_bzWriteClose(
-// BZ2_bzWriteOpen(
-
 //------------------------------------------------------------------------+
 int bsio_Read(int * bzerror, void * b, void * buf, int len)
 {
