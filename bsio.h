@@ -1,11 +1,14 @@
 //------------------------------------------------------------------------+
-// grep -hi BZ2_ *.c | sed -e 's/^.*\(BZ2_.*(\).*$/\1/p' | grep -v errx | sort | uniq
-// BZ2_bzRead(
-// BZ2_bzReadClose(
-// BZ2_bzReadOpen(
-// BZ2_bzWrite(
-// BZ2_bzWriteClose(
-// BZ2_bzWriteOpen(
+#include <bz2lib.h>    // BZFILE
+
+//------------------------------------------------------------------------+
+typedef struct
+{
+	// TODO: add other I/O options.  hex dump, LZ compression..
+	
+	BZFILE *pfbz2;
+}
+bsio_t;
 
 //------------------------------------------------------------------------+
 int bsio_Read(int * bzerror, void * b, void * buf, int len);
