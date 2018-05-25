@@ -8,11 +8,14 @@ typedef struct
 	
 	BZFILE *pfbz2;
     int bz2err;
+    int readcount;
+
+    unsigned long refcount;
 }
 bsio_t;
 
 //------------------------------------------------------------------------+
-int bsio_Read(int * bzerror, void * b, void * buf, int len);
+void bsio_Read(void * b, void * buf, int len);
 void * bsio_ReadOpen(int * bzerror, FILE * f, int verbosity, int small,
 		void * unused, int nUnused);
 void bsio_ReadClose(int * bzerror, void * b);

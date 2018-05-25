@@ -1,14 +1,29 @@
 //------------------------------------------------------------------------+
 #include <bzlib.h>
+#include <err.h>
 
+#include "bsio.h"
 #include "utils.h"
 
-static unsigned long refcount = 0;
+//------------------------------------------------------------------------+
+// module data
+static bsio_t bsio = {
+		NULL,
+		0,
+		0,
+		0
+};
 
 //------------------------------------------------------------------------+
-int bsio_Read(int * bzerror, void * b, void * buf, int len)
+void bsio_Read(void * b, void * buf, int len)
 {
-	return BZ2_bzRead(bzerror, b, buf, len);
+	bsio.readcount = BZ2_bzRead(&bsio.bz2err, b, buf, len);
+
+    if ((bsio.readcount < len) ||
+    		((bsio.bz2err != BZ_OK) && (bsio.bz2err != BZ_STREAM_END)))
+	{
+		errx(1, "%s: Short read, corrupt patch\n", __FUNCTION__);
+	}
 }
 
 //------------------------------------------------------------------------+
@@ -27,12 +42,17 @@ void bsio_ReadClose(int * bzerror, void * b)
 //------------------------------------------------------------------------+
 void bsio_Write(int * bzerror, void * b, void * buf, int len)
 {
-	printf("%s: refcount: %lu\n", __FUNCTION__, refcount);
+	printf("%s: refcount: %lu\n", __FUNCTION__, bsio.refcount);
 	hexdump(buf, len);
-	refcount++;
+	bsio.refcount++;
 	printf("\n");
 
 	BZ2_bzWrite(bzerror, b, buf, len);
+    if (bzerror != BZ_OK)
+    {
+        errx(1, "bsio_Write, bz2err = %d", bz2err);
+    }
+
 }
 
 //------------------------------------------------------------------------+
@@ -48,4 +68,8 @@ void bsio_WriteClose(int * bzerror, void * b, int abandon,
 		unsigned int * nbytes_in, unsigned int * nbytes_out)
 {
 	BZ2_bzWriteClose(bzerror, b, abandon, nbytes_in, nbytes_out);
+    if (bzerror != BZ_OK)
+    {
+        errx(1, "bsio_WriteClose, bz2err = %d", bz2err);
+    }
 }

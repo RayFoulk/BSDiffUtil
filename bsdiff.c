@@ -572,26 +572,15 @@ int main(int argc, char *argv[])
             dblen += lenf;
             eblen += (scan - lenb) - (lastscan + lenf);
 
+            // TODO: Add reason argument to all for debug output
             offtout(lenf, buf);
             bsio_Write(&bz2err, pfbz2, buf, 8);
-            if (bz2err != BZ_OK)
-            {
-                errx(1, "bsio_Write, bz2err = %d", bz2err);
-            }
 
             offtout((scan - lenb) - (lastscan + lenf), buf);
             bsio_Write(&bz2err, pfbz2, buf, 8);
-            if (bz2err != BZ_OK)
-            {
-                errx(1, "bsio_Write, bz2err = %d", bz2err);
-            }
 
             offtout((pos - lenb) - (lastpos + lenf), buf);
             bsio_Write(&bz2err, pfbz2, buf, 8);
-            if (bz2err != BZ_OK)
-            {
-                errx(1, "bsio_Write, bz2err = %d", bz2err);
-            }
 
             lastscan = scan - lenb;
             lastpos = pos - lenb;
@@ -600,10 +589,7 @@ int main(int argc, char *argv[])
     }
 
     bsio_WriteClose(&bz2err, pfbz2, 0, NULL, NULL);
-    if (bz2err != BZ_OK)
-    {
-        errx(1, "bsio_WriteClose, bz2err = %d", bz2err);
-    }
+
 
     // Compute size of compressed ctrl data
     if ((len = ftello(pf)) == -1)
