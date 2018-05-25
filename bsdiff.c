@@ -36,6 +36,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "bsio.h"
+
 //------------------------------------------------------------------------+
 #define MIN(x,y) (((x)<(y)) ? (x) : (y))
 
@@ -441,9 +443,9 @@ int main(int argc, char *argv[])
     }
 
     // Compute the differences, writing ctrl as we go
-    if ((pfbz2 = BZ2_bzWriteOpen(&bz2err, pf, 9, 0, 0)) == NULL)
+    if ((pfbz2 = bsio_WriteOpen(&bz2err, pf, 9, 0, 0)) == NULL)
     {
-        errx(1, "BZ2_bzWriteOpen, bz2err = %d", bz2err);
+        errx(1, "bsio_WriteOpen, bz2err = %d", bz2err);
     }
 
     pos = 0;
@@ -571,24 +573,24 @@ int main(int argc, char *argv[])
             eblen += (scan - lenb) - (lastscan + lenf);
 
             offtout(lenf, buf);
-            BZ2_bzWrite(&bz2err, pfbz2, buf, 8);
+            bsio_Write(&bz2err, pfbz2, buf, 8);
             if (bz2err != BZ_OK)
             {
-                errx(1, "BZ2_bzWrite, bz2err = %d", bz2err);
+                errx(1, "bsio_Write, bz2err = %d", bz2err);
             }
 
             offtout((scan - lenb) - (lastscan + lenf), buf);
-            BZ2_bzWrite(&bz2err, pfbz2, buf, 8);
+            bsio_Write(&bz2err, pfbz2, buf, 8);
             if (bz2err != BZ_OK)
             {
-                errx(1, "BZ2_bzWrite, bz2err = %d", bz2err);
+                errx(1, "bsio_Write, bz2err = %d", bz2err);
             }
 
             offtout((pos - lenb) - (lastpos + lenf), buf);
-            BZ2_bzWrite(&bz2err, pfbz2, buf, 8);
+            bsio_Write(&bz2err, pfbz2, buf, 8);
             if (bz2err != BZ_OK)
             {
-                errx(1, "BZ2_bzWrite, bz2err = %d", bz2err);
+                errx(1, "bsio_Write, bz2err = %d", bz2err);
             }
 
             lastscan = scan - lenb;
@@ -597,10 +599,10 @@ int main(int argc, char *argv[])
         }
     }
 
-    BZ2_bzWriteClose(&bz2err, pfbz2, 0, NULL, NULL);
+    bsio_WriteClose(&bz2err, pfbz2, 0, NULL, NULL);
     if (bz2err != BZ_OK)
     {
-        errx(1, "BZ2_bzWriteClose, bz2err = %d", bz2err);
+        errx(1, "bsio_WriteClose, bz2err = %d", bz2err);
     }
 
     // Compute size of compressed ctrl data
@@ -612,21 +614,21 @@ int main(int argc, char *argv[])
     offtout(len - 32, header + 8);
 
     // Write compressed diff data
-    if ((pfbz2 = BZ2_bzWriteOpen(&bz2err, pf, 9, 0, 0)) == NULL)
+    if ((pfbz2 = bsio_WriteOpen(&bz2err, pf, 9, 0, 0)) == NULL)
     {
-        errx(1, "BZ2_bzWriteOpen, bz2err = %d", bz2err);
+        errx(1, "bsio_WriteOpen, bz2err = %d", bz2err);
     }
 
-    BZ2_bzWrite(&bz2err, pfbz2, db, dblen);
+    bsio_Write(&bz2err, pfbz2, db, dblen);
     if (bz2err != BZ_OK)
     {
-        errx(1, "BZ2_bzWrite, bz2err = %d", bz2err);
+        errx(1, "bsio_Write, bz2err = %d", bz2err);
     }
 
-    BZ2_bzWriteClose(&bz2err, pfbz2, 0, NULL, NULL);
+    bsio_WriteClose(&bz2err, pfbz2, 0, NULL, NULL);
     if (bz2err != BZ_OK)
     {
-        errx(1, "BZ2_bzWriteClose, bz2err = %d", bz2err);
+        errx(1, "bsio_WriteClose, bz2err = %d", bz2err);
     }
 
     // Compute size of compressed diff data
@@ -638,21 +640,21 @@ int main(int argc, char *argv[])
     offtout(newsize - len, header + 16);
 
     // Write compressed extra data
-    if ((pfbz2 = BZ2_bzWriteOpen(&bz2err, pf, 9, 0, 0)) == NULL)
+    if ((pfbz2 = bsio_WriteOpen(&bz2err, pf, 9, 0, 0)) == NULL)
     {
-        errx(1, "BZ2_bzWriteOpen, bz2err = %d", bz2err);
+        errx(1, "bsio_WriteOpen, bz2err = %d", bz2err);
     }
 
-    BZ2_bzWrite(&bz2err, pfbz2, eb, eblen);
+    bsio_Write(&bz2err, pfbz2, eb, eblen);
     if (bz2err != BZ_OK)
     {
-        errx(1, "BZ2_bzWrite, bz2err = %d", bz2err);
+        errx(1, "bsio_Write, bz2err = %d", bz2err);
     }
 
-    BZ2_bzWriteClose(&bz2err, pfbz2, 0, NULL, NULL);
+    bsio_WriteClose(&bz2err, pfbz2, 0, NULL, NULL);
     if (bz2err != BZ_OK)
     {
-        errx(1, "BZ2_bzWriteClose, bz2err = %d", bz2err);
+        errx(1, "bsio_WriteClose, bz2err = %d", bz2err);
     }
 
     // Seek to the beginning, write the header, and close the file

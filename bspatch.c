@@ -35,6 +35,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include "bsio.h"
+
 //------------------------------------------------------------------------+
 static off_t offtin(u_char * buf)
 {
@@ -146,9 +148,9 @@ int main(int argc, char *argv[])
         err(1, "fseeko(%s, %lld)", argv[3], (long long)32);
     }
 
-    if ((cpfbz2 = BZ2_bzReadOpen(&cbz2err, cpf, 0, 0, NULL, 0)) == NULL)
+    if ((cpfbz2 = bsio_ReadOpen(&cbz2err, cpf, 0, 0, NULL, 0)) == NULL)
     {
-        errx(1, "BZ2_bzReadOpen, bz2err = %d", cbz2err);
+        errx(1, "bsio_ReadOpen, bz2err = %d", cbz2err);
     }
 
     if ((dpf = fopen(argv[3], "r")) == NULL)
@@ -161,9 +163,9 @@ int main(int argc, char *argv[])
         err(1, "fseeko(%s, %lld)", argv[3], (long long)(32 + bzctrllen));
     }
 
-    if ((dpfbz2 = BZ2_bzReadOpen(&dbz2err, dpf, 0, 0, NULL, 0)) == NULL)
+    if ((dpfbz2 = bsio_ReadOpen(&dbz2err, dpf, 0, 0, NULL, 0)) == NULL)
     {
-        errx(1, "BZ2_bzReadOpen, bz2err = %d", dbz2err);
+        errx(1, "bsio_ReadOpen, bz2err = %d", dbz2err);
     }
 
     if ((epf = fopen(argv[3], "r")) == NULL)
@@ -177,9 +179,9 @@ int main(int argc, char *argv[])
             (long long)(32 + bzctrllen + bzdatalen));
     }
 
-    if ((epfbz2 = BZ2_bzReadOpen(&ebz2err, epf, 0, 0, NULL, 0)) == NULL)
+    if ((epfbz2 = bsio_ReadOpen(&ebz2err, epf, 0, 0, NULL, 0)) == NULL)
     {
-        errx(1, "BZ2_bzReadOpen, bz2err = %d", ebz2err);
+        errx(1, "bsio_ReadOpen, bz2err = %d", ebz2err);
     }
 
     if (((fd = open(argv[1], O_RDONLY, 0)) < 0) ||
@@ -203,7 +205,7 @@ int main(int argc, char *argv[])
         // Read control data
         for (i = 0; i <= 2; i++)
         {
-            lenread = BZ2_bzRead(&cbz2err, cpfbz2, buf, 8);
+            lenread = bsio_Read(&cbz2err, cpfbz2, buf, 8);
             if ((lenread < 8) || ((cbz2err != BZ_OK) &&
                                   (cbz2err != BZ_STREAM_END)))
             {
@@ -220,7 +222,7 @@ int main(int argc, char *argv[])
         }
 
         // Read diff string
-        lenread = BZ2_bzRead(&dbz2err, dpfbz2, new + newpos, ctrl[0]);
+        lenread = bsio_Read(&dbz2err, dpfbz2, new + newpos, ctrl[0]);
         if ((lenread < ctrl[0]) ||
             ((dbz2err != BZ_OK) && (dbz2err != BZ_STREAM_END)))
         {
@@ -247,7 +249,7 @@ int main(int argc, char *argv[])
         }
 
         // Read extra string
-        lenread = BZ2_bzRead(&ebz2err, epfbz2, new + newpos, ctrl[1]);
+        lenread = bsio_Read(&ebz2err, epfbz2, new + newpos, ctrl[1]);
         if ((lenread < ctrl[1]) ||
             ((ebz2err != BZ_OK) && (ebz2err != BZ_STREAM_END)))
         {
@@ -260,9 +262,9 @@ int main(int argc, char *argv[])
     }
 
     // Clean up the bzip2 reads
-    BZ2_bzReadClose(&cbz2err, cpfbz2);
-    BZ2_bzReadClose(&dbz2err, dpfbz2);
-    BZ2_bzReadClose(&ebz2err, epfbz2);
+    bsio_ReadClose(&cbz2err, cpfbz2);
+    bsio_ReadClose(&dbz2err, dpfbz2);
+    bsio_ReadClose(&ebz2err, epfbz2);
 
     if (fclose(cpf) || fclose(dpf) || fclose(epf))
     {

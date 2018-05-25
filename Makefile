@@ -1,5 +1,5 @@
 CC          := gcc
-CFLAGS	    += -O3 -lbz2 -Wall
+CFLAGS	    += -O2 -lbz2 -Wall
 
 PREFIX	    ?= /usr/local
 INSTALL_PRG ?= ${INSTALL} -c -s -m 555
@@ -8,9 +8,9 @@ INSTALL_MAN ?= ${INSTALL} -c -m 444
 #SOURCES := $(wildcard *.c)
 #OBJECTS := $(SOURCES:.c=.o)
 
-DIFF_SRCS   := bsdiff.c bsio.c
+DIFF_SRCS   := bsdiff.c bsio.c utils.c
 DIFF_OBJS   := $(DIFF_SRCS:.c=.o)
-PATCH_SRCS  := bspatch.c bsio.c
+PATCH_SRCS  := bspatch.c bsio.c utils.c
 PATCH_OBJS  := $(PATCH_SRCS:.c=.o)
 
 all:		bsdiff bspatch

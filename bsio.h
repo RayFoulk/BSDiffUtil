@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------+
-#include <bz2lib.h>    // BZFILE
+#include <bzlib.h>   // BZFILE
 
 //------------------------------------------------------------------------+
 typedef struct
@@ -7,6 +7,7 @@ typedef struct
 	// TODO: add other I/O options.  hex dump, LZ compression..
 	
 	BZFILE *pfbz2;
+    int bz2err;
 }
 bsio_t;
 

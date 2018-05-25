@@ -1,4 +1,9 @@
+//------------------------------------------------------------------------+
 #include <bzlib.h>
+
+#include "utils.h"
+
+static unsigned long refcount = 0;
 
 //------------------------------------------------------------------------+
 int bsio_Read(int * bzerror, void * b, void * buf, int len)
@@ -20,8 +25,13 @@ void bsio_ReadClose(int * bzerror, void * b)
 }
 
 //------------------------------------------------------------------------+
-void bsio_Write(int * bzerror, void* b, void * buf, int len)
+void bsio_Write(int * bzerror, void * b, void * buf, int len)
 {
+	printf("%s: refcount: %lu\n", __FUNCTION__, refcount);
+	hexdump(buf, len);
+	refcount++;
+	printf("\n");
+
 	BZ2_bzWrite(bzerror, b, buf, len);
 }
 
