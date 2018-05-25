@@ -1,12 +1,29 @@
-CFLAGS		+=	-O3 -lbz2 -Wall
+CC          := gcc
+CFLAGS	    += -O3 -lbz2 -Wall
 
-PREFIX		?=	/usr/local
-INSTALL_PROGRAM	?=	${INSTALL} -c -s -m 555
-INSTALL_MAN	?=	${INSTALL} -c -m 444
+PREFIX	    ?= /usr/local
+INSTALL_PRG ?= ${INSTALL} -c -s -m 555
+INSTALL_MAN ?= ${INSTALL} -c -m 444
+
+#SOURCES := $(wildcard *.c)
+#OBJECTS := $(SOURCES:.c=.o)
+
+DIFF_SRCS   := bsdiff.c bsio.c
+DIFF_OBJS   := $(DIFF_SRCS:.c=.o)
+PATCH_SRCS  := bspatch.c bsio.c
+PATCH_OBJS  := $(PATCH_SRCS:.c=.o)
 
 all:		bsdiff bspatch
-bsdiff:		bsdiff.c bsio.c
-bspatch:	bspatch.c bsio.c
+
+bsdiff:		$(DIFF_SRCS)
+
+bspatch:	$(PATCH_SRCS)
+
+#%.c: %.c
+#	$(CC) -c $(CFLAGS) $< -o $@
+
+clean:
+	rm -f bsdiff bspatch tests/bin.patch tests/bin.patched
 
 test:
 	./bsdiff tests/bin1 tests/bin2 tests/bin.patch
@@ -15,12 +32,7 @@ test:
 	md5sum tests/bin2
 	md5sum tests/bin.patched
 
-clean:
-	rm -f bsdiff bspatch tests/bin.patch tests/bin.patched
-
 install:
-	${INSTALL_PROGRAM} bsdiff bspatch ${PREFIX}/bin
-#.ifndef WITHOUT_MAN
-#	${INSTALL_MAN} bsdiff.1 bspatch.1 ${PREFIX}/man/man1
-#.endif
+	${INSTALL_PRG} bsdiff bspatch ${PREFIX}/bin
+	${INSTALL_MAN} bsdiff.1 bspatch.1 ${PREFIX}/man/man1
 
