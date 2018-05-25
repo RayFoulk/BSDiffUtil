@@ -4,9 +4,9 @@
 //------------------------------------------------------------------------+
 typedef struct
 {
-	// TODO: add other I/O options.  hex dump, LZ compression..
+    // TODO: add other I/O options.  hex dump, LZ compression..
 	
-	BZFILE *pfbz2;
+    BZFILE *pfbz2;
     int bz2err;
     int readcount;
 
