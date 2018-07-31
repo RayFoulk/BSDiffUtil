@@ -1,5 +1,5 @@
 # BSDiff-Fork
-Fork of Colin Percival's BSDiff Utility
+Fork of Colin Percival's BSDiff Utility mainly for purposes of gathering metrics
 
 # Primary Goals
 Modifications to the original BSDiff utility in this repo are intended to:
